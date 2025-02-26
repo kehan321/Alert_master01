@@ -9,16 +9,23 @@ import 'package:mqtt_client/mqtt_server_client.dart';
 class MqttController extends GetxController {
   MqttServerClient? client;
   String topicSSIDvalue = "";
-  var deviceID = 0.obs;
-  var dxtemp = 0.obs;
-  var dxtempsp = 0.obs;
-  var dxstate = 77.obs;
-  var alarmString = 0.obs;
-  var timenow = 0.obs;
-  var myIP = ''.obs;
-  var packetSequence = 0.obs;
-  var ssid = ''.obs;
-  var password = ''.obs;
+  var tempsp1 = 0.obs;
+  var tempsp2 = 0.obs;
+  var tempsp3 = 0.obs;
+
+  var pressuresp1 = 0.obs;
+  var pressuresp2 = 0.obs;
+  var pressuresp3 = 0.obs;
+
+  var dischargelinetemp = 0.obs;
+  var suctionlinetemp = 0.obs;
+  var supplylinetemp = 0.obs;
+
+  var dischargepressure = 0.obs;
+  var suctionpressure = 0.obs;
+  var oilpressure = 0.obs;
+
+  var dxstate = 0.obs;
   var mqttBroker = "192.168.18.112".obs;
   var clientId = "flutter45".obs;
   var port = 1883.obs;
@@ -26,6 +33,8 @@ class MqttController extends GetxController {
 
   var isConnected = false.obs;
   var message = "".obs;
+  var toggle = false.obs;
+  var isOn = false.obs;
 
   @override
   void onInit() {
@@ -33,6 +42,14 @@ class MqttController extends GetxController {
     super.onInit();
     _setupMqttClient();
     _connectMqtt();
+  }
+
+  void toggleButton() {
+    toggle.value = !toggle.value;
+  }
+
+  void toggleStatus() {
+    isOn.value = !isOn.value;
   }
 
   updatetopicSSIDvalue(value) {
@@ -59,7 +76,7 @@ class MqttController extends GetxController {
     log('Connected to Onconnect.');
     isConnected.value = true;
 
-    client?.subscribe('/KRC/AM1/1', MqttQos.atLeastOnce);
+    client?.subscribe('/KRC/HVAC-AAA001', MqttQos.atLeastOnce);
     client?.updates?.listen((List<MqttReceivedMessage<MqttMessage>>? messages) {
       final MqttPublishMessage msg = messages![0].payload as MqttPublishMessage;
 
@@ -72,7 +89,7 @@ class MqttController extends GetxController {
       log("message1");
       receivedMessage.value = message;
 
-      if (topic == "/KRC/AM1/1") {
+      if (topic == "/KRC/HVAC-AAA001") {
         print('Message Received on /KRC/$topicSSIDvalue: $message');
         _handleMessage(message);
       }
@@ -104,32 +121,45 @@ class MqttController extends GetxController {
 
   void _handleMessage(String message) async {
     try {
-      Map<String, dynamic> jsonMap = jsonDecode(message);
+      Map<String, dynamic> data = jsonDecode(message);
 
-      deviceID.value =
-          int.tryParse(jsonMap['device_id']?.toString() ?? '') ?? 0;
-      dxtemp.value = int.tryParse(jsonMap['dxtemp']?.toString() ?? '') ?? 0;
-      dxtempsp.value = int.tryParse(jsonMap['dxtempsp']?.toString() ?? '') ?? 0;
-      dxstate.value = int.tryParse(jsonMap['dxstate']?.toString() ?? '') ?? 0;
-      alarmString.value = int.tryParse(jsonMap['alarm']?.toString() ?? '') ?? 0;
-      timenow.value = int.tryParse(jsonMap['timenow']?.toString() ?? '') ?? 0;
-      myIP.value = jsonMap['ip_address']?.toString() ?? '';
-      packetSequence.value =
-          int.tryParse(jsonMap['packet_id']?.toString() ?? '') ?? 0;
-      ssid.value = jsonMap['ssid']?.toString() ?? '';
-      password.value = jsonMap['password']?.toString() ?? '';
+      tempsp1.value = int.tryParse(data["tempsp1"].toString()) ?? 0;
+      tempsp2.value = int.tryParse(data["tempsp2"].toString()) ?? 0;
+      tempsp3.value = int.tryParse(data["tempsp3"].toString()) ?? 0;
+
+      pressuresp1.value = int.tryParse(data["pressuresp1"].toString()) ?? 0;
+      pressuresp2.value = int.tryParse(data["pressuresp2"].toString()) ?? 0;
+      pressuresp3.value = int.tryParse(data["pressuresp3"].toString()) ?? 0;
+
+      dischargelinetemp.value =
+          int.tryParse(data["dischargelinetemp"].toString()) ?? 0;
+      suctionlinetemp.value =
+          int.tryParse(data["suctionlinetemp"].toString()) ?? 0;
+      supplylinetemp.value =
+          int.tryParse(data["supplylinetemp"].toString()) ?? 0;
+
+      dischargepressure.value =
+          int.tryParse(data["dischargepressure"].toString()) ?? 0;
+      suctionpressure.value =
+          int.tryParse(data["sucrionpressure"].toString()) ?? 0; // Fixed typo
+      oilpressure.value = int.tryParse(data["oilpressure"].toString()) ?? 0;
+
+      dxstate.value = int.tryParse(data["dxstate"].toString()) ?? 0;
 
       log("Received MQTT Data:");
-      log("device_id = $deviceID");
-      log("dxtemp = $dxtemp");
-      log("dxtempsp = $dxtempsp");
-      log("dxstate = $dxstate");
-      log("alarm = $alarmString");
-      log("timenow = $timenow");
-      log("ip_address = $myIP");
-      log("packet_id = $packetSequence");
-      log("ssid = $ssid");
-      log("password = $password");
+      log("tempsp1 = ${tempsp1.value}");
+      log("tempsp2 = ${tempsp2.value}");
+      log("tempsp3 = ${tempsp3.value}");
+      log("pressuresp1 = ${pressuresp1.value}");
+      log("pressuresp2 = ${pressuresp2.value}");
+      log("pressuresp3 = ${pressuresp3.value}");
+      log("dischargelinetemp = ${dischargelinetemp.value}");
+      log("suctionlinetemp = ${suctionlinetemp.value}");
+      log("supplylinetemp = ${supplylinetemp.value}");
+      log("dischargepressure = ${dischargepressure.value}");
+      log("suctionpressure = ${suctionpressure.value}"); // Fixed typo
+      log("oilpressure = ${oilpressure.value}");
+      log("dxstate = ${dxstate.value}");
     } catch (e) {
       log("Error parsing JSON: $e");
     }
@@ -137,12 +167,19 @@ class MqttController extends GetxController {
 
   void buildJsonPayload() {
     Map<String, dynamic> jsonPayload = {
-      "dxtempsp": dxtempsp.value.toString(),
+      "tempsp1": tempsp1.value.toString(),
+      "tempsp2": tempsp2.value.toString(),
+      "tempsp3": tempsp3.value.toString(),
+      "pressuresp1": pressuresp1.value.toString(),
+      "pressuresp2": pressuresp2.value.toString(),
+      "pressuresp3": pressuresp3.value.toString(),
+      "dischargelinetemp": dischargelinetemp.value.toString(),
+      "suctionlinetemp": suctionlinetemp.value.toString(),
+      "supplylinetemp": supplylinetemp.value.toString(),
+      "dischargepressure": dischargepressure.value.toString(),
+      "suctionpressure": suctionpressure.value.toString(),
+      "oilpressure": oilpressure.value.toString(),
       "dxstate": dxstate.value.toString(),
-      "alarm": alarmString.value.toString(),
-      "timenow": timenow.value.toString(),
-      "ip_address": myIP.value.toString(),
-      "packet_id": packetSequence.value.toString(),
     };
 
     String jsonString = jsonEncode(jsonPayload);
@@ -150,7 +187,7 @@ class MqttController extends GetxController {
   }
 
   void publishMessage(String message) {
-    String topic = "/test/AM1/";
+    String topic = "/test/HVAC-AAA001/1";
     if (client != null) {
       final builder = MqttClientPayloadBuilder();
       builder.addString(message);
@@ -169,8 +206,33 @@ class MqttController extends GetxController {
     }
   }
 
-  // void setTemperature(String sp) {
-  //   dxstate.value = int.tryParse(sp) ?? 0;
-  //   buildJsonPayload();
-  // }
+  void setTemperature(String sp) {
+    tempsp2.value = int.tryParse(sp) ?? 0;
+    buildJsonPayload();
+  }
+
+  void dischargeSetPoint(String sp) {
+    tempsp1.value = int.tryParse(sp) ?? 0;
+    buildJsonPayload();
+  }
+
+  void supplyLineSetPoint(String sp) {
+    tempsp3.value = int.tryParse(sp) ?? 0;
+    buildJsonPayload();
+  }
+
+  void supplyLinePressure(String sp) {
+    pressuresp2.value = int.tryParse(sp) ?? 0;
+    buildJsonPayload();
+  }
+
+  void dischargePressureSetPoint(String sp) {
+    pressuresp1.value = int.tryParse(sp) ?? 0;
+    buildJsonPayload();
+  }
+
+  void oilPressureSetPoint(String sp) {
+    pressuresp3.value = int.tryParse(sp) ?? 0;
+    buildJsonPayload();
+  }
 }

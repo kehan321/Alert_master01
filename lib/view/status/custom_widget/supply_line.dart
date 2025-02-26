@@ -1,11 +1,16 @@
-import 'package:alert_master1/controller/status_controller/info_card/info_card_controller.dart';
+import 'package:alert_master1/controller/mqtt_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SupplyLine extends StatelessWidget {
   final TextEditingController dialogcontroller = TextEditingController();
-  final InfoController2 controller =
-      Get.put(InfoController2()); // Inject GetX controller
+
+  final MqttController _mqttController = Get.find<MqttController>();
+  SupplyLine({
+    super.key,
+  }) {
+    dialogcontroller.text = _mqttController.tempsp3.value.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,61 +26,68 @@ class SupplyLine extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Obx(() => Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        controller.title.value,
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      GestureDetector(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text("Set Point Supply"),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    TextField(
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Supply line",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("Set Point Supply"),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Obx(
+                                  () {
+                                    dialogcontroller.text = _mqttController
+                                        .tempsp3.value
+                                        .toString();
+                                    return TextField(
                                       controller: dialogcontroller,
                                       decoration: InputDecoration(
                                         hintText: "Type here...",
                                         border: OutlineInputBorder(),
                                       ),
-                                    ),
-                                    const SizedBox(
-                                        height:
-                                            10), // Space before additional text
-                                  ],
+                                    );
+                                  },
                                 ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text("Save"),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                          child: Icon(
-                            Icons.settings,
-                            size: 30,
-                          ))
-                    ],
-                  ),
-                )),
+                                const SizedBox(
+                                    height: 10), // Space before additional text
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                  onPressed: () {
+                                    _mqttController.supplyLineSetPoint(
+                                        dialogcontroller.text);
+                                    Navigator.pop(context);
+                                  },
+                                  child: const Text("Save")),
+                            ],
+                          ),
+                        );
+                      },
+                      child: Icon(
+                        Icons.settings,
+                        size: 30,
+                      ))
+                ],
+              ),
+            ),
             SizedBox(
               height: 10,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Obx(() => Text(controller.subText1.value,
-                    style: TextStyle(fontSize: 16))),
-                Obx(() => Text("${controller.value1.value}",
+                Text("current temp", style: TextStyle(fontSize: 16)),
+                Obx(() => Text("${_mqttController.supplylinetemp.value}",
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
               ],
@@ -84,9 +96,8 @@ class SupplyLine extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Obx(() => Text(controller.subText2.value,
-                    style: TextStyle(fontSize: 16))),
-                Obx(() => Text("${controller.value2.value}",
+                Text("Set Point", style: TextStyle(fontSize: 16)),
+                Obx(() => Text("${_mqttController.tempsp3.value}",
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
               ],

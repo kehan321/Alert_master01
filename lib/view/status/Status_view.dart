@@ -1,7 +1,4 @@
-import 'dart:developer';
-
 import 'package:alert_master1/controller/mqtt_controller.dart';
-import 'package:alert_master1/controller/status_controller/status_controller.dart';
 import 'package:alert_master1/view/status/custom_widget/temperature.dart';
 import 'package:alert_master1/view/status/custom_widget/discharge.dart';
 import 'package:alert_master1/view/status/custom_widget/discharge_pressure.dart';
@@ -12,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class StatusScreen extends StatelessWidget {
-  final StatusController controller = Get.put(StatusController());
   final MqttController _mqttController = Get.put(MqttController());
   @override
   Widget build(BuildContext context) {
@@ -25,7 +21,7 @@ class StatusScreen extends StatelessWidget {
             children: [
               SizedBox(height: 20),
               GestureDetector(
-                onTap: () => controller.toggleStatus(),
+                onTap: () => _mqttController.toggleStatus(),
                 child: Center(
                   child: Container(
                     padding: EdgeInsets.all(16),
@@ -39,11 +35,11 @@ class StatusScreen extends StatelessWidget {
                             Text("Compressor Status: ",
                                 style: TextStyle(fontSize: 18)),
                             Text(
-                              controller.isOn.value ? "ON" : "OFF",
+                              _mqttController.dxstate.value == 1 ? "ON" : "OFF",
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: controller.isOn.value
+                                color: _mqttController.dxstate.value == 1
                                     ? Colors.green
                                     : Colors.red,
                               ),
@@ -59,9 +55,7 @@ class StatusScreen extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Temperature(
-                      data: "${_mqttController.dxstate.value}",
-                    ),
+                    child: Temperature(),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
@@ -90,11 +84,11 @@ class StatusScreen extends StatelessWidget {
                       padding: const EdgeInsets.all(8.0),
                       child: GestureDetector(
                           onLongPress: () {
-                            controller.toggleButton();
+                            _mqttController.toggleButton();
                           },
                           child: DischargePressure()),
                     ),
-                    if (controller.toggle.value == true)
+                    if (_mqttController.toggle.value == true)
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: OilPressure(),

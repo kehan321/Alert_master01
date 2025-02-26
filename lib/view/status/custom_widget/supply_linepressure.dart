@@ -1,12 +1,16 @@
-import 'package:alert_master1/controller/status_controller/info_card/info_card_controller.dart';
+import 'package:alert_master1/controller/mqtt_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class SupplyLinepressure extends StatelessWidget {
   final TextEditingController dialogcontroller = TextEditingController();
 
-  final InfoController3 controller =
-      Get.put(InfoController3()); // Inject GetX controller
+  final MqttController _mqttController = Get.find<MqttController>();
+  SupplyLinepressure({
+    super.key,
+  }) {
+    dialogcontroller.text = _mqttController.pressuresp2.value.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,62 +26,69 @@ class SupplyLinepressure extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Obx(() => Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        controller.title.value,
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      GestureDetector(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text("Suction Line pressure"),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Text before the TextField
-                                    TextField(
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "S.L.P",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("Suction Line pressure"),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Obx(
+                                  () {
+                                    dialogcontroller.text = _mqttController
+                                        .pressuresp2.value
+                                        .toString();
+                                    return TextField(
                                       controller: dialogcontroller,
                                       decoration: InputDecoration(
                                         hintText: "Type here...",
                                         border: OutlineInputBorder(),
                                       ),
-                                    ),
-                                    const SizedBox(
-                                        height:
-                                            10), // Space before additional text
-                                  ],
+                                    );
+                                  },
                                 ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text("Save"),
-                                  ),
-                                ],
+                                const SizedBox(
+                                    height: 10), // Space before additional tex
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  _mqttController.supplyLinePressure(
+                                      dialogcontroller.text);
+                                  Navigator.pop(context);
+                                },
+                                child: const Text("Save"),
                               ),
-                            );
-                          },
-                          child: Icon(
-                            Icons.settings,
-                            size: 30,
-                          ))
-                    ],
-                  ),
-                )),
+                            ],
+                          ),
+                        );
+                      },
+                      child: Icon(
+                        Icons.settings,
+                        size: 30,
+                      ))
+                ],
+              ),
+            ),
             SizedBox(
               height: 10,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Obx(() => Text(controller.subText1.value,
-                    style: TextStyle(fontSize: 16))),
-                Obx(() => Text("${controller.value1.value}",
+                Text("current psi", style: TextStyle(fontSize: 16)),
+                Obx(() => Text("${_mqttController.suctionpressure.value}",
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
               ],
@@ -86,9 +97,8 @@ class SupplyLinepressure extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Obx(() => Text(controller.subText2.value,
-                    style: TextStyle(fontSize: 16))),
-                Obx(() => Text("${controller.value2.value}",
+                Text("Set psi", style: TextStyle(fontSize: 16)),
+                Obx(() => Text("${_mqttController.pressuresp2.value}",
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
               ],

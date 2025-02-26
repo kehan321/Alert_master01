@@ -1,19 +1,23 @@
-import 'package:alert_master1/controller/status_controller/info_card/info_card_controller.dart'
-    show InfoController5;
+import 'package:alert_master1/controller/mqtt_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class OilPressure extends StatelessWidget {
   final TextEditingController dialogcontroller = TextEditingController();
-  final InfoController5 controller =
-      Get.put(InfoController5()); // Inject GetX controller
+
+  final MqttController _mqttController = Get.find<MqttController>();
+
+  OilPressure({
+    super.key,
+  }) {
+    dialogcontroller.text = _mqttController.pressuresp3.value.toString();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: Get.width * 0.45, // 90% of screen width
-      height: Get.height * 0.18, // Fixed height
-
+      width: Get.width * 0.45,
+      height: Get.height * 0.18,
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8), color: Color(0xffb8f7ff)),
       child: Padding(
@@ -21,62 +25,69 @@ class OilPressure extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Obx(() => Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        controller.title.value,
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      GestureDetector(
-                          onTap: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: const Text("Oil Pressure"),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Text before the TextField
-                                    TextField(
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Oil Pressure",
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text("Oil Pressure"),
+                            content: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Obx(
+                                  () {
+                                    dialogcontroller.text = _mqttController
+                                        .pressuresp3.value
+                                        .toString();
+                                    return TextField(
                                       controller: dialogcontroller,
                                       decoration: InputDecoration(
                                         hintText: "Type here...",
                                         border: OutlineInputBorder(),
                                       ),
-                                    ),
-                                    const SizedBox(
-                                        height:
-                                            10), // Space before additional text
-                                  ],
+                                    );
+                                  },
                                 ),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text("Save"),
-                                  ),
-                                ],
+                                const SizedBox(
+                                    height: 10), // Space before additional text
+                              ],
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  _mqttController.oilPressureSetPoint(
+                                      dialogcontroller.text);
+                                  Navigator.pop(context);
+                                },
+                                child: const Text("Save"),
                               ),
-                            );
-                          },
-                          child: Icon(
-                            Icons.settings,
-                            size: 30,
-                          ))
-                    ],
-                  ),
-                )),
+                            ],
+                          ),
+                        );
+                      },
+                      child: Icon(
+                        Icons.settings,
+                        size: 30,
+                      ))
+                ],
+              ),
+            ),
             SizedBox(
               height: 10,
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Obx(() => Text(controller.subText1.value,
-                    style: TextStyle(fontSize: 16))),
-                Obx(() => Text("${controller.value1.value}",
+                Text("current psi", style: TextStyle(fontSize: 16)),
+                Obx(() => Text("${_mqttController.oilpressure.value}",
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
               ],
@@ -85,9 +96,8 @@ class OilPressure extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Obx(() => Text(controller.subText2.value,
-                    style: TextStyle(fontSize: 16))),
-                Obx(() => Text("${controller.value2.value}",
+                Text("Set Point", style: TextStyle(fontSize: 16)),
+                Obx(() => Text("${_mqttController.pressuresp3.value}",
                     style:
                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold))),
               ],
