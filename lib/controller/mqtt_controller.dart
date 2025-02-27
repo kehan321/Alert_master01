@@ -17,15 +17,15 @@ class MqttController extends GetxController {
   var pressuresp2 = 0.obs;
   var pressuresp3 = 0.obs;
 
-  var dischargelinetemp = 0.obs;
-  var suctionlinetemp = 0.obs;
-  var supplylinetemp = 0.obs;
+  var dischargelinetemp = 0.0.obs;
+  var suctionlinetemp = 0.0.obs;
+  var supplylinetemp = 0.0.obs;
 
-  var dischargepressure = 0.obs;
-  var suctionpressure = 0.obs;
-  var oilpressure = 0.obs;
+  var dischargepressure = 0.0.obs;
+  var suctionpressure = 0.0.obs;
+  var oilpressure = 0.0.obs;
 
-  var dxstate = 0.obs;
+  var comprsw = 0.obs;
   var mqttBroker = "192.168.18.112".obs;
   var clientId = "flutter45".obs;
   var port = 1883.obs;
@@ -35,7 +35,8 @@ class MqttController extends GetxController {
   var message = "".obs;
   var toggle = false.obs;
   var isOn = false.obs;
-
+  var ip = "".obs;
+  TextEditingController passwordController = TextEditingController();
   @override
   void onInit() {
     log("MQTT controller onit");
@@ -76,7 +77,7 @@ class MqttController extends GetxController {
     log('Connected to Onconnect.');
     isConnected.value = true;
 
-    client?.subscribe('/KRC/HVAC-AAA001', MqttQos.atLeastOnce);
+    client?.subscribe('/KRC/HVAC-AAA009', MqttQos.atLeastOnce);
     client?.updates?.listen((List<MqttReceivedMessage<MqttMessage>>? messages) {
       final MqttPublishMessage msg = messages![0].payload as MqttPublishMessage;
 
@@ -89,7 +90,7 @@ class MqttController extends GetxController {
       log("message1");
       receivedMessage.value = message;
 
-      if (topic == "/KRC/HVAC-AAA001") {
+      if (topic == "/KRC/HVAC-AAA009") {
         print('Message Received on /KRC/$topicSSIDvalue: $message');
         _handleMessage(message);
       }
@@ -132,20 +133,22 @@ class MqttController extends GetxController {
       pressuresp3.value = int.tryParse(data["pressuresp3"].toString()) ?? 0;
 
       dischargelinetemp.value =
-          int.tryParse(data["dischargelinetemp"].toString()) ?? 0;
+          double.tryParse(data["dischargelinetemp"]) ?? 0.0;
       suctionlinetemp.value =
-          int.tryParse(data["suctionlinetemp"].toString()) ?? 0;
+          double.tryParse(data["suctionlinetemp"].toString()) ?? 0.0;
       supplylinetemp.value =
-          int.tryParse(data["supplylinetemp"].toString()) ?? 0;
+          double.tryParse(data["supplylinetemp"].toString()) ?? 0.0;
 
       dischargepressure.value =
-          int.tryParse(data["dischargepressure"].toString()) ?? 0;
+          double.tryParse(data["dischargepressure"].toString()) ?? 0.0;
       suctionpressure.value =
-          int.tryParse(data["sucrionpressure"].toString()) ?? 0; // Fixed typo
-      oilpressure.value = int.tryParse(data["oilpressure"].toString()) ?? 0;
+          double.tryParse(data["sucrionpressure"].toString()) ??
+              0.0; // Fixed typo
+      oilpressure.value =
+          double.tryParse(data["oilpressure"].toString()) ?? 0.0;
 
-      dxstate.value = int.tryParse(data["dxstate"].toString()) ?? 0;
-
+      comprsw.value = int.tryParse(data["comprsw"].toString()) ?? 0;
+      ip.value = data["ip_address"].toString();
       log("Received MQTT Data:");
       log("tempsp1 = ${tempsp1.value}");
       log("tempsp2 = ${tempsp2.value}");
@@ -159,7 +162,8 @@ class MqttController extends GetxController {
       log("dischargepressure = ${dischargepressure.value}");
       log("suctionpressure = ${suctionpressure.value}"); // Fixed typo
       log("oilpressure = ${oilpressure.value}");
-      log("dxstate = ${dxstate.value}");
+      log("dxstate = ${comprsw.value}");
+      log("IP_ADDRESS = ${ip.value}");
     } catch (e) {
       log("Error parsing JSON: $e");
     }
@@ -179,7 +183,7 @@ class MqttController extends GetxController {
       "dischargepressure": dischargepressure.value.toString(),
       "suctionpressure": suctionpressure.value.toString(),
       "oilpressure": oilpressure.value.toString(),
-      "dxstate": dxstate.value.toString(),
+      "comprsw": comprsw.value.toString(),
     };
 
     String jsonString = jsonEncode(jsonPayload);
@@ -187,7 +191,7 @@ class MqttController extends GetxController {
   }
 
   void publishMessage(String message) {
-    String topic = "/test/HVAC-AAA001/1";
+    String topic = "/test/HVAC-AAA009/1";
     if (client != null) {
       final builder = MqttClientPayloadBuilder();
       builder.addString(message);

@@ -35,11 +35,11 @@ class StatusScreen extends StatelessWidget {
                             Text("Compressor Status: ",
                                 style: TextStyle(fontSize: 18)),
                             Text(
-                              _mqttController.dxstate.value == 1 ? "ON" : "OFF",
+                              _mqttController.comprsw.value == 1 ? "ON" : "OFF",
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
-                                color: _mqttController.dxstate.value == 1
+                                color: _mqttController.comprsw.value == 1
                                     ? Colors.green
                                     : Colors.red,
                               ),
@@ -83,19 +83,55 @@ class StatusScreen extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: GestureDetector(
-                          onLongPress: () {
-                            _mqttController.toggleButton();
-                          },
-                          child: DischargePressure()),
+                        onLongPress: () {
+                          Get.defaultDialog(
+                            title: "Enter Password",
+                            content: Column(
+                              children: [
+                                TextField(
+                                  controller:
+                                      _mqttController.passwordController,
+                                  obscureText: true,
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    hintText: "Enter Password",
+                                  ),
+                                ),
+                                SizedBox(height: 10),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    if (_mqttController
+                                            .passwordController.text ==
+                                        "123456") {
+                                      _mqttController.toggleButton();
+                                      Get.back();
+                                    } else {
+                                      Get.snackbar("Error", "Invalid Password",
+                                          backgroundColor: Colors.red,
+                                          colorText: Colors.white);
+                                    }
+                                  },
+                                  child: Text("Submit"),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: DischargePressure(),
+                      ),
                     ),
                     if (_mqttController.toggle.value == true)
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: OilPressure(),
+                        child: GestureDetector(
+                            onLongPress: () {
+                              _mqttController.toggle.value = false;
+                            },
+                            child: OilPressure()),
                       ),
                   ],
                 ),
-              ),
+              )
             ],
           ),
         ),
