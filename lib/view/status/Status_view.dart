@@ -1,10 +1,5 @@
 import 'package:alert_master1/controller/mqtt_controller.dart';
-import 'package:alert_master1/view/status/custom_widget/temperature.dart';
-import 'package:alert_master1/view/status/custom_widget/discharge.dart';
-import 'package:alert_master1/view/status/custom_widget/discharge_pressure.dart';
-import 'package:alert_master1/view/status/custom_widget/oil_pressure.dart';
-import 'package:alert_master1/view/status/custom_widget/supply_line.dart';
-import 'package:alert_master1/view/status/custom_widget/supply_linepressure.dart';
+import 'package:alert_master1/view/status/custom_widget/temp.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -12,126 +7,120 @@ class StatusScreen extends StatelessWidget {
   final MqttController _mqttController = Get.put(MqttController());
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.cyan,
-        body: SingleChildScrollView(
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Alert Master",
+          style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+              color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.black87, // Custom color
+        // elevation: 4, // Adds a slight shadow effect
+        shadowColor: Colors.black87,
+        toolbarHeight: 80, // Slightly taller toolbar for better spacing
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(15),
+          ),
+        ),
+
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings, size: 26, color: Colors.white),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      backgroundColor: Get.isDarkMode ? Colors.black : Colors.black87,
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 20),
-              GestureDetector(
-                onTap: () => _mqttController.toggleStatus(),
-                child: Center(
-                  child: Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Color(0xffb8f7ff),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Obx(() => Row(
-                          mainAxisSize: MainAxisSize.min,
+              Obx(() => GestureDetector(
+                    onTap: () => _mqttController.toggleStatus(),
+                    child: Card(
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15)),
+                      child: Container(
+                        width: screenWidth * 0.92,
+                        height: screenHeight * 0.09,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 10),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.black87,
+                        ),
+                        child: Row(
+                          mainAxisSize:
+                              MainAxisSize.min, // Keeps row size minimal
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("Compressor Status: ",
-                                style: TextStyle(fontSize: 18)),
                             Text(
-                              _mqttController.comprsw.value == 1 ? "ON" : "OFF",
+                              "Compressor ",
                               style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white),
+                            ),
+                            SizedBox(
+                              width: screenWidth * 0.35,
+                            ), // Small spacing
+                            Container(
+                              width: screenWidth * 0.18,
+
+                              height: screenHeight * 0.05, // Adjusted height
+                              alignment: Alignment
+                                  .center, // Center text inside the box
+                              decoration: BoxDecoration(
                                 color: _mqttController.comprsw.value == 1
                                     ? Colors.green
                                     : Colors.red,
+                                borderRadius:
+                                    BorderRadius.circular(8), // Rounded corners
+                              ),
+                              child: Text(
+                                _mqttController.comprsw.value == 1
+                                    ? "ON"
+                                    : "OFF",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors
+                                      .white, // White text for better contrast
+                                ),
                               ),
                             ),
                           ],
-                        )),
-                  ),
-                ),
-              ),
-              SizedBox(height: 30),
-              Row(
+                        ),
+                      ),
+                    ),
+                  )),
+              // SizedBox(height: 30),
+              SizedBox(height: 10),
+
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Temperature(),
                   ),
+                  SizedBox(height: 5),
                   Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Discharge(),
+                    child: Pressure(),
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SupplyLine(),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SupplyLinepressure(),
-                  ),
-                ],
-              ),
-              Obx(
-                () => Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: GestureDetector(
-                        onLongPress: () {
-                          Get.defaultDialog(
-                            title: "Enter Password",
-                            content: Column(
-                              children: [
-                                TextField(
-                                  controller:
-                                      _mqttController.passwordController,
-                                  obscureText: true,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    hintText: "Enter Password",
-                                  ),
-                                ),
-                                SizedBox(height: 10),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    if (_mqttController
-                                            .passwordController.text ==
-                                        "123456") {
-                                      _mqttController.toggleButton();
-                                      Get.back();
-                                    } else {
-                                      Get.snackbar("Error", "Invalid Password",
-                                          backgroundColor: Colors.red,
-                                          colorText: Colors.white);
-                                    }
-                                  },
-                                  child: Text("Submit"),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: DischargePressure(),
-                      ),
-                    ),
-                    if (_mqttController.toggle.value == true)
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: GestureDetector(
-                            onLongPress: () {
-                              _mqttController.toggle.value = false;
-                            },
-                            child: OilPressure()),
-                      ),
-                  ],
-                ),
-              )
             ],
           ),
         ),
