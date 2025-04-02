@@ -34,7 +34,7 @@ class PressureView extends StatelessWidget {
   mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Even spacing
   children: [
     _buildTemperatureCard(
-      context, "Suction Line", Icons.thermostat, Colors.redAccent,
+      context, "Suction", Icons.thermostat, Colors.redAccent,
       _mqttController.suctionpressure, _mqttController.pressuresp2.toDouble().obs, screenWidth
     ),
     _buildTemperatureCard(
@@ -205,7 +205,7 @@ class SetPointPage extends StatelessWidget {
                 onPressed: () {
                   String setPointValue = spValue.value.toStringAsFixed(0);
 
-                  if (label == "Suction Line") {
+                  if (label == "Suction") {
                     _mqttController.supplyLinePressure(setPointValue);
                   } else if (label == "Discharge") {
                     _mqttController.dischargePressureSetPoint(setPointValue);

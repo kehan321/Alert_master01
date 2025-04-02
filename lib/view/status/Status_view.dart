@@ -31,10 +31,16 @@ class StatusScreen extends StatelessWidget {
         ),
 
         actions: [
-          IconButton(
-            icon: const Icon(Icons.settings, size: 26, color: Colors.white),
-            onPressed: () {},
-          ),
+          Obx(() {
+            return IconButton(
+              icon: Icon(
+                Icons.settings,
+                size: 26,
+                color: _mqttController.isConnected.value ? Colors.green : Colors.red,
+              ),
+            onPressed: () {              },
+            );
+          }),
         ],
       ),
       backgroundColor: Get.isDarkMode ? Colors.black : Colors.black87,

@@ -72,7 +72,7 @@ class Temperature extends StatelessWidget {
           child: _buildTemperatureColumn(
               icon: Icons.thermostat,
               color: Colors.red,
-              label: "Suction Line",
+              label: "Suction",
               value: _mqttController.suctionlinetemp,
               spValue: _mqttController.tempsp2),
         ),
@@ -85,9 +85,15 @@ class Temperature extends StatelessWidget {
         _buildTemperatureColumn(
             icon: Icons.thermostat,
             color: Colors.green,
-            label: "Supply Line",
+            label: "Supply",
             value: _mqttController.supplylinetemp,
             spValue: _mqttController.tempsp3),
+            _buildTemperatureColumn(
+            icon: Icons.thermostat,
+            color: Colors.yellow,
+            label: "return",
+            value: _mqttController.returnlinetemp,
+            spValue: _mqttController.tempsp4),
       ],
     );
   }
@@ -139,9 +145,9 @@ class Temperature extends StatelessWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _buildTextField(temp1Controller, "Suction Line Temp"),
+            _buildTextField(temp1Controller, "Suction Temp"),
             _buildTextField(temp2Controller, "Discharge Temp"),
-            _buildTextField(temp3Controller, "Supply Line Temp"),
+            _buildTextField(temp3Controller, "Supply Temp"),
           ],
         ),
         actions: [
@@ -313,7 +319,7 @@ Get.to(PressureView());
                       //       mainAxisSize: MainAxisSize.min,
                       //       children: [
                       //         _buildTextField(
-                      //             pressure1Controller, "Supply Line Pressure"),
+                      //             pressure1Controller, "Supply Pressure"),
                       //         const SizedBox(height: 10),
                       //         _buildTextField(
                       //             pressure2Controller, "Discharge Pressure"),
@@ -379,7 +385,7 @@ Widget _buildPressureRow() {
           child: _buildPressureColumn(
             icon: Icons.speed,
             color: Colors.red,
-            label: "Suction Line",
+            label: "Suction",
             value: _mqttController.suctionpressure,
             spValue: _mqttController.pressuresp2,
           ),
@@ -400,7 +406,7 @@ Widget _buildPressureRow() {
         _buildPressureColumn(
           icon: Icons.speed,
           color: Colors.red,
-          label: "Suction Line",
+          label: "Suction",
           value: _mqttController.suctionpressure,
           spValue: _mqttController.pressuresp2,
         ),

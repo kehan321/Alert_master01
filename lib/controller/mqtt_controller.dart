@@ -268,7 +268,8 @@ class MqttController extends GetxController {
 
   var tempsp1 = 0.obs;
   var tempsp2 = 0.obs;
-  var tempsp3 = 0.obs;
+  var tempsp3 = 0.obs; 
+  var tempsp4 = 0.obs; 
 
   var pressuresp1 = 0.obs;
   var pressuresp2 = 0.obs;
@@ -277,6 +278,7 @@ class MqttController extends GetxController {
   var dischargelinetemp = 0.0.obs;
   var suctionlinetemp = 0.0.obs;
   var supplylinetemp = 0.0.obs;
+  var returnlinetemp = 0.0.obs;
 
   var dischargepressure = 0.0.obs;
   var suctionpressure = 0.0.obs;
@@ -390,6 +392,7 @@ class MqttController extends GetxController {
       tempsp1.value = int.tryParse(data["tempsp1"].toString()) ?? 0;
       tempsp2.value = int.tryParse(data["tempsp2"].toString()) ?? 0;
       tempsp3.value = int.tryParse(data["tempsp3"].toString()) ?? 0;
+      tempsp4.value = int.tryParse(data["tempsp4"].toString()) ?? 0;
 
       pressuresp1.value = int.tryParse(data["pressuresp1"].toString()) ?? 0;
       pressuresp2.value = int.tryParse(data["pressuresp2"].toString()) ?? 0;
@@ -401,6 +404,8 @@ class MqttController extends GetxController {
           double.tryParse(data["suctionlinetemp"].toString()) ?? 0.0;
       supplylinetemp.value =
           double.tryParse(data["supplylinetemp"].toString()) ?? 0.0;
+      returnlinetemp.value =
+          double.tryParse(data["returnlinetemp"].toString()) ?? 0.0;
 
       dischargepressure.value =
           double.tryParse(data["dischargepressure"].toString()) ?? 0.0;
@@ -416,12 +421,14 @@ class MqttController extends GetxController {
       log("tempsp1 = ${tempsp1.value}");
       log("tempsp2 = ${tempsp2.value}");
       log("tempsp3 = ${tempsp3.value}");
+      log("tempsp4 = ${tempsp4.value}");
       log("pressuresp1 = ${pressuresp1.value}");
       log("pressuresp2 = ${pressuresp2.value}");
       log("pressuresp3 = ${pressuresp3.value}");
       log("dischargelinetemp = ${dischargelinetemp.value}");
       log("suctionlinetemp = ${suctionlinetemp.value}");
       log("supplylinetemp = ${supplylinetemp.value}");
+      log("returnlinetemp = ${returnlinetemp.value}");
       log("dischargepressure = ${dischargepressure.value}");
       log("suctionpressure = ${suctionpressure.value}"); // Fixed typo
       log("oilpressure = ${oilpressure.value}");
@@ -436,13 +443,13 @@ class MqttController extends GetxController {
     Map<String, dynamic> jsonPayload = {
       "tempsp1": tempsp1.value.toString(),
       "tempsp2": tempsp2.value.toString(),
-      "tempsp3": tempsp3.value.toString(),
+      "tempsp4": tempsp4.value.toString(),
       "pressuresp1": pressuresp1.value.toString(),
       "pressuresp2": pressuresp2.value.toString(),
       "pressuresp3": pressuresp3.value.toString(),
       "dischargelinetemp": dischargelinetemp.value.toString(),
       "suctionlinetemp": suctionlinetemp.value.toString(),
-      "supplylinetemp": supplylinetemp.value.toString(),
+      "returnlinetemp": returnlinetemp.value.toString(),
       "dischargepressure": dischargepressure.value.toString(),
       "suctionpressure": suctionpressure.value.toString(),
       "oilpressure": oilpressure.value.toString(),
@@ -485,6 +492,10 @@ class MqttController extends GetxController {
 
   void supplyLineSetPoint(String sp) {
     tempsp3.value = int.tryParse(sp) ?? 0;
+    buildJsonPayload();
+  }
+  void returnLineSetPoint(String sp) {
+    tempsp4.value = int.tryParse(sp) ?? 0;
     buildJsonPayload();
   }
 
