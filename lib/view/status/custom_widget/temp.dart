@@ -1,13 +1,31 @@
 import 'package:alert_master1/view/status/pressure_view.dart';
 import 'package:alert_master1/view/status/temp_view.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:alert_master1/controller/mqtt_controller.dart';
+import 'dart:developer';
 
 class Temperature extends StatelessWidget {
   Temperature({super.key});
 
   final MqttController _mqttController = Get.find<MqttController>();
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+// Function to play the alarm sound with logs
+  Future<void> playAlarmSound() async {
+    try {
+      log('Attempting to play alarm sound...');
+
+      // Play the alarm sound without using the return value
+      await _audioPlayer.play(AssetSource('assets/beep.mp3'));
+
+      // Log success after the sound is played
+      log('✅ Alarm sound played successfully');
+    } catch (e) {
+      log('Error playing alarm sound: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,10 +61,15 @@ class Temperature extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
-          "Temperature",
-          style: TextStyle(
-              fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+        TextButton(
+          onPressed: () {
+            playAlarmSound();
+          },
+          child: Text(
+            "Temperature",
+            style: TextStyle(
+                fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
         ),
         IconButton(
           // onPressed: () => _showSettingsDialog(context),
@@ -59,49 +82,63 @@ class Temperature extends StatelessWidget {
 
   /// Builds the temperature row with columns
   Widget _buildTemperatureRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        GestureDetector(
-          onTap:() {
-            Get.to(""
-
-
-            );
-          },
-          child: _buildTemperatureColumn(
-              icon: Icons.thermostat,
-              color: Colors.red,
-              label: "Suction",
-              value: _mqttController.suctionlinetemp,
-              spValue: _mqttController.tempsp2),
-        ),
-        _buildTemperatureColumn(
-            icon: Icons.thermostat,
-            color: Colors.blue,
-            label: "Discharge",
-            value: _mqttController.dischargelinetemp,
-            spValue: _mqttController.tempsp1),
-        _buildTemperatureColumn(
-            icon: Icons.thermostat,
-            color: Colors.green,
-            label: "Supply",
-            value: _mqttController.supplylinetemp,
-            spValue: _mqttController.tempsp3),
+    return Obx(() => Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            GestureDetector(
+              onTap: () {
+                playAlarmSound();
+              },
+              child: _buildTemperatureColumn(
+                  icon: Icons.thermostat,
+                  textcolor: (_mqttController.suctionlinetemp.value <=
+                          _mqttController.tempsp2.value)
+                      ? Colors.grey
+                      : Colors.red,
+                  color: Colors.red,
+                  label: "Suction",
+                  value: _mqttController.suctionlinetemp,
+                  spValue: _mqttController.tempsp2),
+            ),
             _buildTemperatureColumn(
-            icon: Icons.thermostat,
-            color: Colors.yellow,
-            label: "return",
-            value: _mqttController.returnlinetemp,
-            spValue: _mqttController.tempsp4),
-      ],
-    );
+                icon: Icons.thermostat,
+                textcolor: (_mqttController.dischargelinetemp.value >=
+                        _mqttController.tempsp1.value)
+                    ? Colors.grey
+                    : Colors.red,
+                color: Colors.blue,
+                label: "Discharge",
+                value: _mqttController.dischargelinetemp,
+                spValue: _mqttController.tempsp1),
+            _buildTemperatureColumn(
+                icon: Icons.thermostat,
+                color: Colors.green,
+                textcolor: (_mqttController.supplylinetemp.value <=
+                        _mqttController.tempsp3.value)
+                    ? Colors.grey
+                    : Colors.grey,
+                label: "Supply",
+                value: _mqttController.supplylinetemp,
+                spValue: _mqttController.tempsp3),
+            _buildTemperatureColumn(
+                icon: Icons.thermostat,
+                textcolor: (_mqttController.returnlinetemp.value <=
+                        _mqttController.tempsp4.value)
+                    ? Colors.grey
+                    : Colors.red,
+                color: Colors.yellow,
+                label: "return",
+                value: _mqttController.returnlinetemp,
+                spValue: _mqttController.tempsp4),
+          ],
+        ));
   }
 
   /// Builds individual temperature columns
   Widget _buildTemperatureColumn({
     required IconData icon,
     required Color color,
+    required Color textcolor,
     required String label,
     required RxDouble value,
     required spValue,
@@ -114,9 +151,7 @@ class Temperature extends StatelessWidget {
         Obx(() => Text(
               "${value.value}°",
               style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey),
+                  fontSize: 14, fontWeight: FontWeight.bold, color: textcolor),
             )),
         Obx(() => Text(
               "SP: ${spValue.value}",
@@ -191,75 +226,75 @@ class Pressure extends StatefulWidget {
 class _PressureState extends State<Pressure> {
   final MqttController _mqttController = Get.find<MqttController>();
 
+  final TextEditingController passwordController =
+      TextEditingController(); // Declare outside
 
-final TextEditingController passwordController = TextEditingController(); // Declare outside
-
-void _showPasswordDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      title: Row(
-        children: [
-          const Icon(Icons.lock, color: Colors.blue),
-          const SizedBox(width: 10),
-          const Text("Enter Password"),
+  void _showPasswordDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: Row(
+          children: [
+            const Icon(Icons.lock, color: Colors.blue),
+            const SizedBox(width: 10),
+            const Text("Enter Password"),
+          ],
+        ),
+        content: TextField(
+          controller: passwordController, // Reuse controller
+          decoration: InputDecoration(
+            labelText: "Password",
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+            prefixIcon: const Icon(Icons.password),
+          ),
+          obscureText: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              if (passwordController.text == "123456") {
+                Get.back(); // Close password dialog
+                _showConfirmationDialog(); // ✅ Call separate function for confirmation
+              } else {
+                Future.delayed(Duration.zero, () {
+                  ScaffoldMessenger.of(Get.context!).showSnackBar(
+                    const SnackBar(content: Text("Incorrect Password")),
+                  );
+                });
+              }
+            },
+            child: const Text("Submit"),
+          ),
         ],
       ),
-      content: TextField(
-        controller: passwordController, // Reuse controller
-        decoration: InputDecoration(
-          labelText: "Password",
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-          prefixIcon: const Icon(Icons.password),
-        ),
-        obscureText: true,
+    );
+  }
+
+  /// ✅ Move Confirmation Dialog to a Separate Function
+  void _showConfirmationDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Confirm Action'),
+        content: const Text('Are you sure you want to proceed?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(), // Close dialog
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back(); // Close confirmation dialog
+              _mqttController.showOilPressure.value = !_mqttController
+                  .showOilPressure.value; // ✅ Proper state update
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            if (passwordController.text == "123456") {
-              Get.back(); // Close password dialog
-              _showConfirmationDialog(); // ✅ Call separate function for confirmation
-            } else {
-              Future.delayed(Duration.zero, () {
-                ScaffoldMessenger.of(Get.context!).showSnackBar(
-                  const SnackBar(content: Text("Incorrect Password")),
-                );
-              });
-            }
-          },
-          child: const Text("Submit"),
-        ),
-      ],
-    ),
-  );
-}
+    );
+  }
 
-/// ✅ Move Confirmation Dialog to a Separate Function
-void _showConfirmationDialog() {
-  Get.dialog(
-    AlertDialog(
-      title: const Text('Confirm Action'),
-      content: const Text('Are you sure you want to proceed?'),
-      actions: [
-        TextButton(
-          onPressed: () => Get.back(), // Close dialog
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () {
-            Get.back(); // Close confirmation dialog
-            _mqttController.showOilPressure.value = !_mqttController.showOilPressure.value; // ✅ Proper state update
-          },
-          child: const Text('Confirm'),
-        ),
-      ],
-    ),
-  );
-}
-
- 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
@@ -299,9 +334,8 @@ void _showConfirmationDialog() {
                       color: Colors.white,
                     ),
                     onPressed: () {
-Get.to(PressureView());
+                      Get.to(PressureView());
 
-                      
                       // final pressure1Controller = TextEditingController(
                       //     text: _mqttController.pressuresp2.value.toString());
                       // final pressure2Controller = TextEditingController(
@@ -354,8 +388,6 @@ Get.to(PressureView());
 
               const SizedBox(height: 45),
               _buildPressureRow(),
-            
-            
             ],
           ),
         ),
@@ -374,73 +406,73 @@ Get.to(PressureView());
     );
   }
 
-Widget _buildPressureRow() {
-  return Obx(() {
-    List<Widget> pressureWidgets = [];
+  Widget _buildPressureRow() {
+    return Obx(() {
+      List<Widget> pressureWidgets = [];
 
-    if (!_mqttController.showOilPressure.value) {
-      pressureWidgets.addAll([
-        Padding(
-          padding: const EdgeInsets.only(left: 30),
-          child: _buildPressureColumn(
+      if (!_mqttController.showOilPressure.value) {
+        pressureWidgets.addAll([
+          Padding(
+            padding: const EdgeInsets.only(left: 30),
+            child: _buildPressureColumn(
+              icon: Icons.speed,
+              color: Colors.red,
+              label: "Suction",
+              value: _mqttController.suctionpressure,
+              spValue: _mqttController.pressuresp2,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(right: 30),
+            child: _buildPressureColumn(
+              icon: Icons.speed,
+              color: Colors.blue,
+              label: "Discharge",
+              value: _mqttController.dischargepressure,
+              spValue: _mqttController.pressuresp1,
+            ),
+          ),
+        ]);
+      } else {
+        pressureWidgets.addAll([
+          _buildPressureColumn(
             icon: Icons.speed,
             color: Colors.red,
             label: "Suction",
             value: _mqttController.suctionpressure,
             spValue: _mqttController.pressuresp2,
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 30),
-          child: _buildPressureColumn(
-            icon: Icons.speed,
-            color: Colors.blue,
-            label: "Discharge",
-            value: _mqttController.dischargepressure,
-            spValue: _mqttController.pressuresp1,
-          ),
-        ),
-      ]);
-    } else {
-      pressureWidgets.addAll([
-        _buildPressureColumn(
-          icon: Icons.speed,
-          color: Colors.red,
-          label: "Suction",
-          value: _mqttController.suctionpressure,
-          spValue: _mqttController.pressuresp2,
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 20),
-          child: _buildPressureColumn(
-            icon: Icons.speed,
-            color: Colors.blue,
-            label: "Discharge",
-            value: _mqttController.dischargepressure,
-            spValue: _mqttController.pressuresp1,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 20),
-          child: Center(
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
             child: _buildPressureColumn(
               icon: Icons.speed,
-              color: Colors.green,
-              label: "Oil",
-              value: _mqttController.oilpressure,
-              spValue: _mqttController.pressuresp3,
+              color: Colors.blue,
+              label: "Discharge",
+              value: _mqttController.dischargepressure,
+              spValue: _mqttController.pressuresp1,
             ),
           ),
-        ),
-      ]);
-    }
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: Center(
+              child: _buildPressureColumn(
+                icon: Icons.speed,
+                color: Colors.green,
+                label: "Oil",
+                value: _mqttController.oilpressure,
+                spValue: _mqttController.pressuresp3,
+              ),
+            ),
+          ),
+        ]);
+      }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: pressureWidgets,
-    );
-  });
-}
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: pressureWidgets,
+      );
+    });
+  }
 
   Widget _buildPressureColumn({
     required IconData icon,

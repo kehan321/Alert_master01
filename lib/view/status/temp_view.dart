@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 
-
 // class TemperatureView extends StatelessWidget {
 //   TemperatureView({super.key});
 
@@ -14,7 +13,7 @@ import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 //   Widget build(BuildContext context) {
 //     final double screenWidth = MediaQuery.of(context).size.width;
 //     final double screenHeight = MediaQuery.of(context).size.height;
-    
+
 //     return Scaffold(
 //       appBar: AppBar(
 //         automaticallyImplyLeading: false,
@@ -25,7 +24,7 @@ import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 //       ),
 //       body: Padding(
 //         padding: EdgeInsets.symmetric(
-//           vertical: screenHeight * 0.01, 
+//           vertical: screenHeight * 0.01,
 //           horizontal: screenWidth * 0.05
 //         ),
 //         child: Column(
@@ -105,8 +104,6 @@ import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 //   }
 // }
 
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -121,170 +118,184 @@ class TemperatureView extends StatelessWidget {
     final double screenHeight = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        foregroundColor: Colors.white,
-        title: Text(
-          "Temperature Readings",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: screenWidth * 0.05),
+        appBar: AppBar(
+          automaticallyImplyLeading: false,
+          foregroundColor: Colors.white,
+          title: Text(
+            "Temperature Readings",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: screenWidth * 0.05),
+          ),
+          backgroundColor: Colors.black87,
+          centerTitle: true,
         ),
-        backgroundColor: Colors.black87,
-        centerTitle: true,
-      ),
-      body: 
-    Padding(
-  padding: EdgeInsets.symmetric(
-    vertical: screenHeight * 0.01,
-    horizontal: screenWidth * 0.05,
-  ),
-  child: Column(
-    mainAxisAlignment: MainAxisAlignment.center,
-    children: [
-      // First Row of Cards
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Flexible(
-            fit: FlexFit.tight,
-            child: _buildTemperatureCard(
-              "Suction",
-              Icons.thermostat,
-              Colors.redAccent,
-              _mqttController.suctionlinetemp,
-              _mqttController.tempsp2.toDouble().obs,
-              screenWidth,
-            ),
+        body: Padding(
+          padding: EdgeInsets.symmetric(
+            vertical: screenHeight * 0.01,
+            horizontal: screenWidth * 0.05,
           ),
-          SizedBox(width: screenWidth*0.05,),
-          Flexible(
-            fit: FlexFit.tight,
-            child: _buildTemperatureCard(
-              "Discharge",
-              Icons.thermostat,
-              Colors.blueAccent,
-              _mqttController.dischargelinetemp,
-              _mqttController.tempsp1.toDouble().obs,
-              screenWidth,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // First Row of Cards
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    fit: FlexFit.tight,
+                    child: _buildTemperatureCard(
+                      "Suction",
+                      Icons.thermostat,
+                      Colors.redAccent,
+                      (_mqttController.suctionlinetemp.value <=
+                              _mqttController.tempsp2.value)
+                          ? Colors.grey
+                          : Colors.red,
+                      _mqttController.suctionlinetemp,
+                      _mqttController.tempsp2.toDouble().obs,
+                      screenWidth,
+                    ),
+                  ),
+                  SizedBox(
+                    width: screenWidth * 0.05,
+                  ),
+                  Flexible(
+                    fit: FlexFit.tight,
+                    child: _buildTemperatureCard(
+                      "Discharge",
+                      Icons.thermostat,
+                      Colors.blueAccent,
+                      (_mqttController.dischargelinetemp.value >=
+                              _mqttController.tempsp1.value)
+                          ? Colors.grey
+                          : Colors.red,
+                      _mqttController.dischargelinetemp,
+                      _mqttController.tempsp1.toDouble().obs,
+                      screenWidth,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: screenHeight * 0.015), // Space between rows
+              // Second Row of Cards
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    fit: FlexFit.tight,
+                    child: _buildTemperatureCard(
+                      "Supply",
+                      Icons.thermostat,
+                      Colors.greenAccent,
+                      (_mqttController.suctionlinetemp.value <=
+                              _mqttController.tempsp2.value)
+                          ? Colors.grey
+                          : Colors.grey,
+                      _mqttController.supplylinetemp,
+                      _mqttController.tempsp3.toDouble().obs,
+                      screenWidth,
+                    ),
+                  ),
+                  SizedBox(
+                    width: screenWidth * 0.05,
+                  ),
+                  Flexible(
+                    fit: FlexFit.tight,
+                    child: _buildTemperatureCard(
+                      "Return",
+                      Icons.thermostat,
+                      Colors.greenAccent,
+                      (_mqttController.returnlinetemp.value <=
+                              _mqttController.tempsp4.value)
+                          ? Colors.grey
+                          : Colors.red,
+                      _mqttController.returnlinetemp,
+                      _mqttController.tempsp4.toDouble().obs,
+                      screenWidth,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
-      SizedBox(height: screenHeight * 0.015), // Space between rows
-      // Second Row of Cards
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Flexible(
-            fit: FlexFit.tight,
-            child: _buildTemperatureCard(
-              "Supply",
-              Icons.thermostat,
-              Colors.greenAccent,
-              _mqttController.supplylinetemp,
-              _mqttController.tempsp3.toDouble().obs,
-              screenWidth,
-            ),
-          ),
-          SizedBox(width: screenWidth*0.05,),
-
-          Flexible(
-            fit: FlexFit.tight,
-            child: _buildTemperatureCard(
-              "Return",
-              Icons.thermostat,
-              Colors.greenAccent,
-              _mqttController.returnlinetemp,
-              _mqttController.tempsp4.toDouble().obs,
-              screenWidth,
-            ),
-          ),
-        ],
-      ),
-    ],
-  ),
-)
-
-    );
+        ));
   }
 
-Widget _buildTemperatureCard(
-  String label,
-  IconData icon,
-  Color color,
-  RxDouble value,
-  RxDouble spValue,
-  double screenWidth,
-) {
-  return GestureDetector(
-    onTap: () {
-      Get.to(() => SetPointPage(label: label, spValue: spValue));
-    },
-    child: Card(
-      elevation: 10,
-      margin: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Container(
-        padding: EdgeInsets.all(screenWidth * 0.05),
-        constraints: BoxConstraints(
-          minHeight: screenWidth * 0.4, // Ensuring the card has enough space
-          maxHeight: screenWidth * 0.5, // Preventing overflow
-        ),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: Colors.black87,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Flexible(
-              child: Icon(icon, color: color, size: screenWidth * 0.08),
-            ),
-            SizedBox(height: screenWidth * 0.02),
-            Flexible(
-              child: FittedBox(
-                child: Text(label,
-                    style: TextStyle(
-                        fontSize: screenWidth * 0.06,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)),
+  Widget _buildTemperatureCard(
+    String label,
+    IconData icon,
+    Color color,
+    Color textColor,
+    RxDouble value,
+    RxDouble spValue,
+    double screenWidth,
+  ) {
+    return GestureDetector(
+      onTap: () {
+        Get.to(() => SetPointPage(label: label, spValue: spValue));
+      },
+      child: Card(
+        elevation: 10,
+        margin: EdgeInsets.symmetric(vertical: screenWidth * 0.01),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        child: Container(
+          padding: EdgeInsets.all(screenWidth * 0.05),
+          constraints: BoxConstraints(
+            minHeight: screenWidth * 0.4, // Ensuring the card has enough space
+            maxHeight: screenWidth * 0.5, // Preventing overflow
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+            color: Colors.black87,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Flexible(
+                child: Icon(icon, color: color, size: screenWidth * 0.08),
               ),
-            ),
-            SizedBox(height: screenWidth * 0.01),
-            Flexible(
-              child: Obx(() => FittedBox(
-                    child: Text(
-                      "${value.value}°",
+              SizedBox(height: screenWidth * 0.02),
+              Flexible(
+                child: FittedBox(
+                  child: Text(label,
                       style: TextStyle(
-                          fontSize: screenWidth * 0.07,
+                          fontSize: screenWidth * 0.06,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white),
-                    ),
-                  )),
-            ),
-            SizedBox(height: screenWidth * 0.01),
-            Flexible(
-              child: Obx(() => FittedBox(
-                    child: Text(
-                      "SP: ${spValue.value}",
-                      style: TextStyle(
-                          fontSize: screenWidth * 0.05,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white70),
-                    ),
-                  )),
-            ),
-          ],
+                          color: Colors.white)),
+                ),
+              ),
+              SizedBox(height: screenWidth * 0.01),
+              Flexible(
+                child: Obx(() => FittedBox(
+                      child: Text(
+                        "${value.value}°",
+                        style: TextStyle(
+                            fontSize: screenWidth * 0.07,
+                            fontWeight: FontWeight.bold,
+                            color: textColor),
+                      ),
+                    )),
+              ),
+              SizedBox(height: screenWidth * 0.01),
+              Flexible(
+                child: Obx(() => FittedBox(
+                      child: Text(
+                        "SP: ${spValue.value}",
+                        style: TextStyle(
+                            fontSize: screenWidth * 0.05,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white70),
+                      ),
+                    )),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
-
-}
-
-
-
 
 class SetPointPage extends StatelessWidget {
   final MqttController _mqttController = Get.find<MqttController>();
@@ -343,14 +354,19 @@ class SetPointPage extends StatelessWidget {
                         trackWidth: 6,
                       ),
                       customColors: CustomSliderColors(
-                        progressBarColors: [Colors.greenAccent, Colors.lightGreen],
+                        progressBarColors: [
+                          Colors.greenAccent,
+                          Colors.lightGreen
+                        ],
                         trackColor: Colors.white.withOpacity(0.2),
                         dotColor: Colors.greenAccent,
                       ),
                     ),
-                    min: 0,
-                    max: 100,
-                    initialValue: spValue.value,
+                    min: -20,
+                    max: 200,
+                    // initialValue: spValue.value,
+                    initialValue: spValue.value.clamp(-20, 200),
+
                     onChange: (double value) {
                       spValue.value = value;
                     },
@@ -384,10 +400,9 @@ class SetPointPage extends StatelessWidget {
                     _mqttController.setTemperature(setPointValue);
                   } else if (label == "Discharge") {
                     _mqttController.dischargeSetPoint(setPointValue);
-                  } else if(label == "Supply") {
+                  } else if (label == "Supply") {
                     _mqttController.supplyLineSetPoint(setPointValue);
-                  
-                  } else if(label == "Return") {
+                  } else if (label == "Return") {
                     _mqttController.returnLineSetPoint(setPointValue);
                   }
 
@@ -405,4 +420,3 @@ class SetPointPage extends StatelessWidget {
     );
   }
 }
-
