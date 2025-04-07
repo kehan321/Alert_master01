@@ -1,5 +1,5 @@
 import 'package:alert_master1/controller/mqtt_controller.dart';
-import 'package:alert_master1/view/status/Status_view.dart';
+import 'package:alert_master1/view/status/custom_widget/Status_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sleek_circular_slider/sleek_circular_slider.dart';
@@ -104,9 +104,6 @@ import 'package:sleek_circular_slider/sleek_circular_slider.dart';
 //   }
 // }
 
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
 class TemperatureView extends StatelessWidget {
   TemperatureView({super.key});
 
@@ -149,8 +146,8 @@ class TemperatureView extends StatelessWidget {
                       Colors.redAccent,
                       (_mqttController.suctionlinetemp.value <=
                               _mqttController.tempsp2.value)
-                          ? Colors.grey
-                          : Colors.red,
+                          ? Colors.red
+                          : Colors.grey,
                       _mqttController.suctionlinetemp,
                       _mqttController.tempsp2.toDouble().obs,
                       screenWidth,
@@ -167,8 +164,8 @@ class TemperatureView extends StatelessWidget {
                       Colors.blueAccent,
                       (_mqttController.dischargelinetemp.value >=
                               _mqttController.tempsp1.value)
-                          ? Colors.grey
-                          : Colors.red,
+                          ? Colors.red
+                          : Colors.grey,
                       _mqttController.dischargelinetemp,
                       _mqttController.tempsp1.toDouble().obs,
                       screenWidth,
@@ -207,8 +204,8 @@ class TemperatureView extends StatelessWidget {
                       Colors.greenAccent,
                       (_mqttController.returnlinetemp.value <=
                               _mqttController.tempsp4.value)
-                          ? Colors.grey
-                          : Colors.red,
+                          ? Colors.red
+                          : Colors.grey,
                       _mqttController.returnlinetemp,
                       _mqttController.tempsp4.toDouble().obs,
                       screenWidth,

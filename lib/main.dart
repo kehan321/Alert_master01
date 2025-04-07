@@ -1,4 +1,4 @@
-import 'package:alert_master1/view/status/Status_view.dart';
+import 'package:alert_master1/view/status/custom_widget/Status_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

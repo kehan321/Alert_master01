@@ -1,39 +1,35 @@
-import 'package:alert_master1/view/status/pressure_view.dart';
-import 'package:alert_master1/view/status/temp_view.dart';
+import 'package:alert_master1/view/status/custom_widget/pressure_view.dart';
+import 'package:alert_master1/view/status/custom_widget/temp_view.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:alert_master1/controller/mqtt_controller.dart';
 import 'dart:developer';
 
-class Temperature extends StatelessWidget {
+class Temperature extends StatefulWidget {
   Temperature({super.key});
 
+  @override
+  State<Temperature> createState() => _TemperatureState();
+}
+
+class _TemperatureState extends State<Temperature> {
   final MqttController _mqttController = Get.find<MqttController>();
-  final AudioPlayer _audioPlayer = AudioPlayer();
 
-// Function to play the alarm sound with logs
-  Future<void> playAlarmSound() async {
-    try {
-      log('Attempting to play alarm sound...');
-
-      // Play the alarm sound without using the return value
-      await _audioPlayer.play(AssetSource('assets/beep.mp3'));
-
-      // Log success after the sound is played
-      log('✅ Alarm sound played successfully');
-    } catch (e) {
-      log('Error playing alarm sound: $e');
-    }
+  @override
+  void initState() {
+    super.initState();
+    // Call the checkAndStoreValues after the widget is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _mqttController.checkAndStoreValues();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-    return
-        // Allows repeated unlocking
-        Card(
+    return Card(
       elevation: 5,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Container(
@@ -62,9 +58,7 @@ class Temperature extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         TextButton(
-          onPressed: () {
-            playAlarmSound();
-          },
+          onPressed: () {},
           child: Text(
             "Temperature",
             style: TextStyle(
@@ -72,7 +66,6 @@ class Temperature extends StatelessWidget {
           ),
         ),
         IconButton(
-          // onPressed: () => _showSettingsDialog(context),
           onPressed: () => Get.to(TemperatureView()),
           icon: const Icon(Icons.settings, size: 26, color: Colors.white),
         ),
@@ -86,15 +79,13 @@ class Temperature extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             GestureDetector(
-              onTap: () {
-                playAlarmSound();
-              },
+              onTap: () {},
               child: _buildTemperatureColumn(
                   icon: Icons.thermostat,
                   textcolor: (_mqttController.suctionlinetemp.value <=
                           _mqttController.tempsp2.value)
-                      ? Colors.grey
-                      : Colors.red,
+                      ? Colors.red
+                      : Colors.grey,
                   color: Colors.red,
                   label: "Suction",
                   value: _mqttController.suctionlinetemp,
@@ -104,8 +95,8 @@ class Temperature extends StatelessWidget {
                 icon: Icons.thermostat,
                 textcolor: (_mqttController.dischargelinetemp.value >=
                         _mqttController.tempsp1.value)
-                    ? Colors.grey
-                    : Colors.red,
+                    ? Colors.red
+                    : Colors.grey,
                 color: Colors.blue,
                 label: "Discharge",
                 value: _mqttController.dischargelinetemp,
@@ -124,10 +115,10 @@ class Temperature extends StatelessWidget {
                 icon: Icons.thermostat,
                 textcolor: (_mqttController.returnlinetemp.value <=
                         _mqttController.tempsp4.value)
-                    ? Colors.grey
-                    : Colors.red,
+                    ? Colors.red
+                    : Colors.grey,
                 color: Colors.yellow,
-                label: "return",
+                label: "Return",
                 value: _mqttController.returnlinetemp,
                 spValue: _mqttController.tempsp4),
           ],
@@ -161,57 +152,6 @@ class Temperature extends StatelessWidget {
                   color: Colors.grey),
             )),
       ],
-    );
-  }
-
-  /// Shows the settings dialog for temperature adjustments
-  void _showSettingsDialog(BuildContext context) {
-    final temp1Controller =
-        TextEditingController(text: _mqttController.tempsp2.value.toString());
-    final temp2Controller =
-        TextEditingController(text: _mqttController.tempsp1.value.toString());
-    final temp3Controller =
-        TextEditingController(text: _mqttController.tempsp3.value.toString());
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Set Temperature Values"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildTextField(temp1Controller, "Suction Temp"),
-            _buildTextField(temp2Controller, "Discharge Temp"),
-            _buildTextField(temp3Controller, "Supply Temp"),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              _mqttController.setTemperature(temp1Controller.text);
-              _mqttController.dischargeSetPoint(temp2Controller.text);
-              _mqttController.supplyLineSetPoint(temp3Controller.text);
-              Navigator.pop(context);
-            },
-            child: const Text("Save", style: TextStyle(fontSize: 16)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Builds a custom TextField for dialog
-  Widget _buildTextField(TextEditingController controller, String label) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        keyboardType: TextInputType.number,
-      ),
     );
   }
 }
